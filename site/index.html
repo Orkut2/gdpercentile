@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GD Percentile Calculator</title>
+<style>
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+</style>
+</head>
+<body>
+
+<h1>GD Percentile Calculator</h1>
+
+<div id="page-eligibility">
+  <p>Are you included on in-game global leaderboards? (i.e. not banned or otherwise disqualified)</p>
+  <p>
+    <label><input type="radio" name="eligibility" value="yes"> Yes</label><br>
+    <label><input type="radio" name="eligibility" value="no"> No</label>
+  </p>
+  <button id="next-eligibility" onclick="advanceEligibility()" disabled>Next</button>
+</div>
+
+<div id="page-stars" hidden>
+  <p><label>How many stars do you have? <input type="number" id="stars" min="0" step="1"></label></p>
+  <p id="error-stars" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-stars" onclick="advanceStarsCount()" disabled>Next</button>
+</div>
+
+<div id="page-stars-rank" hidden>
+  <p><label>What is your global star rank? <input type="number" id="star-rank" min="1" step="1"></label></p>
+  <p>
+    <button id="verify-stars" onclick="verifyRank('stars')" disabled>Verify</button>
+    <span id="stars-verify-status"></span>
+  </p>
+  <p id="error-stars-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-stars-rank" onclick="advanceStarsRank()" disabled>Next</button>
+</div>
+
+<div id="page-moons" hidden>
+  <p><label>How many moons do you have? <input type="number" id="moons" min="0" step="1"></label></p>
+  <p id="error-moons" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-moons" onclick="advanceMoonsCount()" disabled>Next</button>
+</div>
+
+<div id="page-moons-rank" hidden>
+  <p><label>What is your global moon rank? <input type="number" id="moon-rank" min="1" step="1"></label></p>
+  <p>
+    <button id="verify-moons" onclick="verifyRank('moons')" disabled>Verify</button>
+    <span id="moons-verify-status"></span>
+  </p>
+  <p id="error-moons-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-moons-rank" onclick="advanceMoonsRank()" disabled>Next</button>
+</div>
+
+<div id="page-coins" hidden>
+  <p><label>How many user coins do you have? <input type="number" id="user-coins" min="0" step="1"></label></p>
+  <p id="error-coins" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-coins" onclick="advanceCoinsCount()" disabled>Next</button>
+</div>
+
+<div id="page-coins-rank" hidden>
+  <p><label>What is your global user coin rank? <input type="number" id="user-coin-rank" min="1" step="1"></label></p>
+  <p>
+    <button id="verify-coins" onclick="verifyRank('coins')" disabled>Verify</button>
+    <span id="coins-verify-status"></span>
+  </p>
+  <p id="error-coins-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-coins-rank" onclick="advanceCoinsRank()" disabled>Next</button>
+</div>
+
+<div id="page-demons" hidden>
+  <p><label>How many demons have you completed? <input type="number" id="demons" min="0" step="1"></label></p>
+  <p id="error-demons" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-demons" onclick="advanceDemonsCount()" disabled>Next</button>
+</div>
+
+<div id="page-demons-rank" hidden>
+  <p><label>What is your global demon rank? <input type="number" id="demon-rank" min="1" step="1"></label></p>
+  <p>
+    <button id="verify-demons" onclick="verifyRank('demons')" disabled>Verify</button>
+    <span id="demons-verify-status"></span>
+  </p>
+  <p id="error-demons-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-demons-rank" onclick="advanceDemonsRank()" disabled>Next</button>
+</div>
+
+<div id="page-hardest-classic" hidden>
+  <p>What is the hardest classic demon you have completed?</p>
+  <p>
+    <label><input type="checkbox" id="hc-none"> I have not completed a classic demon.</label>
+  </p>
+  <div id="hc-form">
+    <p><label>Level name: <input type="text" id="hc-name"></label></p>
+    <p><label>Creator: <input type="text" id="hc-creator"></label></p>
+    <p><label>Level ID: <input type="number" id="hc-id" min="1" step="1"></label></p>
+    <p>
+      <label>Difficulty:
+        <select id="hc-difficulty">
+          <option value="" selected></option>
+          <option value="Easy Demon">Easy Demon</option>
+          <option value="Medium Demon">Medium Demon</option>
+          <option value="Hard Demon">Hard Demon</option>
+          <option value="Insane Demon">Insane Demon</option>
+          <option value="Extreme Demon">Extreme Demon</option>
+        </select>
+      </label>
+    </p>
+    <p>
+      <label><input type="checkbox" id="hc-unrated"> This demon is not rated.</label>
+    </p>
+    <p>
+      <button id="verify-hc" onclick="verifyHardest('hc')" disabled>Verify</button>
+      <span id="hc-verify-status"></span>
+    </p>
+  </div>
+  <p id="error-hc" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-hc" onclick="advanceHardestClassic()" disabled>Next</button>
+</div>
+
+<!-- ===== Extreme classic sub-flow ===== -->
+
+<div id="page-ec-pcrate-question" hidden>
+  <p>Is <strong class="level-name-extreme"></strong> on the <a href="https://pointercrate.com/demonlist/" target="_blank" rel="noopener">Pointercrate Demonlist</a>?</p>
+  <p>
+    <label><input type="radio" name="ec-pcrate-q" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ec-pcrate-q" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-pcrate-q" onclick="advanceECPcrateQuestion()" disabled>Next</button>
+</div>
+
+<div id="page-ec-pcrate-rank" hidden>
+  <p>What is the current rank of <strong class="level-name-extreme"></strong> on the Pointercrate Demonlist?</p>
+  <p><input type="number" id="ec-pcrate-rank" min="1" step="1"></p>
+  <p id="error-ec-pcrate-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-pcrate-rank" onclick="advanceECPcrateRank()" disabled>Next</button>
+</div>
+
+<div id="page-ec-aredl-rank" hidden>
+  <p>What is the current rank of <strong class="level-name-extreme"></strong> on the <a href="https://aredl.net/list/" target="_blank" rel="noopener">All Rated Extreme Demons List</a>?</p>
+  <p>
+    <label><input type="checkbox" id="ec-aredl-pending"> <strong class="level-name-extreme"></strong> is rated, but not yet placed.</label>
+  </p>
+  <p><input type="number" id="ec-aredl-rank" min="1" step="1"></p>
+  <p id="error-ec-aredl-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-aredl-rank" onclick="advanceECAredlRank()" disabled>Next</button>
+</div>
+
+<div id="page-ec-gdl-question" hidden>
+  <p>Is <strong class="level-name-extreme"></strong> on the <a href="https://demonlist.org/classic" target="_blank" rel="noopener">Global Demonlist</a>?</p>
+  <p>
+    <label><input type="radio" name="ec-gdl-q" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ec-gdl-q" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-gdl-q" onclick="advanceECGdlQuestion()" disabled>Next</button>
+</div>
+
+<div id="page-ec-gdl-rank" hidden>
+  <p>What is the current rank of <strong class="level-name-extreme"></strong> on the Global Demonlist?</p>
+  <p><input type="number" id="ec-gdl-rank" min="1" step="1"></p>
+  <p id="error-ec-gdl-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-gdl-rank" onclick="advanceECGdlRank()" disabled>Next</button>
+</div>
+
+<div id="page-ec-pcrate-worthy" hidden>
+  <p>If <strong class="level-name-extreme"></strong> was rated, would it be worthy of being placed on the <a href="https://pointercrate.com/demonlist/" target="_blank" rel="noopener">Pointercrate Demonlist</a>?</p>
+  <p>
+    <label><input type="radio" name="ec-pcrate-worthy" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ec-pcrate-worthy" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-pcrate-worthy" onclick="advanceECPcrateWorthy()" disabled>Next</button>
+</div>
+
+<div id="page-ec-pcrate-projected" hidden>
+  <p>If <strong class="level-name-extreme"></strong> was rated, what rank would it be on the Pointercrate Demonlist?</p>
+  <p><input type="number" id="ec-pcrate-projected-rank" min="1" step="1"></p>
+  <p>If <strong class="level-name-extreme"></strong> was rated, what level would be immediately below it on the Pointercrate Demonlist?</p>
+  <p><input type="text" id="ec-pcrate-projected-below"></p>
+  <p id="error-ec-pcrate-projected" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ec-pcrate-projected" onclick="advanceECPcrateProjected()" disabled>Next</button>
+</div>
+
+<!-- ===== End extreme classic sub-flow ===== -->
+
+<!-- ===== Geometry Dash Demon Ladder check (applies to all hardest classics; not platformers) ===== -->
+
+<div id="page-gddl-question" hidden>
+  <p>Is <strong class="level-name-extreme"></strong> on the <a href="https://gdladder.com/search" target="_blank" rel="noopener">Geometry Dash Demon Ladder</a>?</p>
+  <p>
+    <label><input type="radio" name="gddl-q" value="yes"> Yes</label><br>
+    <label><input type="radio" name="gddl-q" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-gddl-q" onclick="advanceGDDLQuestion()" disabled>Next</button>
+</div>
+
+<div id="page-gddl-tier" hidden>
+  <p id="gddl-tier-prompt"></p>
+  <p>
+    <label>Tier:
+      <!-- GDDL tiers: 1-39. Default is set dynamically based on difficulty when entering this page. -->
+      <select id="gddl-tier">
+        <option value="1" selected>1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+        <option value="32">32</option>
+        <option value="33">33</option>
+        <option value="34">34</option>
+        <option value="35">35</option>
+        <option value="36">36</option>
+        <option value="37">37</option>
+        <option value="38">38</option>
+        <option value="39">39</option>
+      </select>
+    </label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-gddl-tier" onclick="advanceGDDLTier()" disabled>Next</button>
+</div>
+
+<div id="page-hardest-platformer" hidden>
+  <p>What is the hardest platformer demon you have completed?</p>
+  <p>
+    <label><input type="checkbox" id="hp-none"> I have not completed a platformer demon.</label>
+  </p>
+  <div id="hp-form">
+    <p><label>Level name: <input type="text" id="hp-name"></label></p>
+    <p><label>Creator: <input type="text" id="hp-creator"></label></p>
+    <p><label>Level ID: <input type="number" id="hp-id" min="1" step="1"></label></p>
+    <p>
+      <label>Difficulty:
+        <select id="hp-difficulty">
+          <option value="" selected></option>
+          <option value="Easy Demon">Easy Demon</option>
+          <option value="Medium Demon">Medium Demon</option>
+          <option value="Hard Demon">Hard Demon</option>
+          <option value="Insane Demon">Insane Demon</option>
+          <option value="Extreme Demon">Extreme Demon</option>
+        </select>
+      </label>
+    </p>
+    <p>
+      <label><input type="checkbox" id="hp-unrated"> This demon is not rated.</label>
+    </p>
+    <p>
+      <button id="verify-hp" onclick="verifyHardest('hp')" disabled>Verify</button>
+      <span id="hp-verify-status"></span>
+    </p>
+  </div>
+  <p id="error-hp" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-hp" onclick="advanceHardestPlatformer()" disabled>Next</button>
+</div>
+
+<!-- ===== Extreme platformer sub-flow ===== -->
+
+<div id="page-ep-pemonlist-question" hidden>
+  <p>Is <strong class="level-name-platformer-extreme"></strong> on the <a href="https://pemonlist.com/" target="_blank" rel="noopener">Pemonlist</a>?</p>
+  <p>
+    <label><input type="radio" name="ep-pemonlist-q" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ep-pemonlist-q" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-pemonlist-q" onclick="advanceEPPemonlistQuestion()" disabled>Next</button>
+</div>
+
+<div id="page-ep-pemonlist-rank" hidden>
+  <p>What is the current rank of <strong class="level-name-platformer-extreme"></strong> on the Pemonlist?</p>
+  <p><input type="number" id="ep-pemonlist-rank" min="1" max="150" step="1"></p>
+  <p id="error-ep-pemonlist-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-pemonlist-rank" onclick="advanceEPPemonlistRank()" disabled>Next</button>
+</div>
+
+<div id="page-ep-pemonlist-worthy" hidden>
+  <p>Is <strong class="level-name-platformer-extreme"></strong> worthy of being placed on the <a href="https://pemonlist.com/" target="_blank" rel="noopener">Pemonlist</a>?</p>
+  <p>
+    <label><input type="radio" name="ep-pemonlist-worthy" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ep-pemonlist-worthy" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-pemonlist-worthy" onclick="advanceEPPemonlistWorthy()" disabled>Next</button>
+</div>
+
+<div id="page-ep-tpl-question" hidden>
+  <p>Is <strong class="level-name-platformer-extreme"></strong> on <a href="https://gdplatformerlist.com/" target="_blank" rel="noopener">The Platformer List</a>?</p>
+  <p>
+    <label><input type="radio" name="ep-tpl-q" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ep-tpl-q" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-tpl-q" onclick="advanceEPTPLQuestion()" disabled>Next</button>
+</div>
+
+<div id="page-ep-tpl-rank" hidden>
+  <p>What is the current rank of <strong class="level-name-platformer-extreme"></strong> on The Platformer List?</p>
+  <p><input type="number" id="ep-tpl-rank" min="1" max="100" step="1"></p>
+  <p id="error-ep-tpl-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-tpl-rank" onclick="advanceEPTPLRank()" disabled>Next</button>
+</div>
+
+<div id="page-ep-tpl-worthy" hidden>
+  <p>Is <strong class="level-name-platformer-extreme"></strong> worthy of being placed on <a href="https://gdplatformerlist.com/" target="_blank" rel="noopener">The Platformer List</a>?</p>
+  <p>
+    <label><input type="radio" name="ep-tpl-worthy" value="yes"> Yes</label><br>
+    <label><input type="radio" name="ep-tpl-worthy" value="no"> No</label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-tpl-worthy" onclick="advanceEPTPLWorthy()" disabled>Next</button>
+</div>
+
+<div id="page-ep-pemonlist-projected" hidden>
+  <p>What rank would <strong class="level-name-platformer-extreme"></strong> be on the <a href="https://pemonlist.com/" target="_blank" rel="noopener">Pemonlist</a>?</p>
+  <p><input type="number" id="ep-pemonlist-projected-rank" min="1" max="150" step="1"></p>
+  <p>What level would be immediately below <strong class="level-name-platformer-extreme"></strong> on the Pemonlist?</p>
+  <p><input type="text" id="ep-pemonlist-projected-below"></p>
+  <p id="error-ep-pemonlist-projected" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-pemonlist-projected" onclick="advanceEPPemonlistProjected()" disabled>Next</button>
+</div>
+
+<div id="page-ep-tier" hidden>
+  <p>What tier would <strong class="level-name-platformer-extreme"></strong> be on the <a href="https://docs.google.com/spreadsheets/d/1ApwiAVAcBmfyoPW3wvDzc8JvY4Lfg5tFsPlYg3DNWhc/edit" target="_blank" rel="noopener">Platformer Difficulty Chart</a>?</p>
+  <p>
+    <label>Tier:
+      <select id="ep-tier">
+        <option value="" selected></option>
+        <option value="6">6 (Challenging)</option>
+        <option value="7">7 (Difficult)</option>
+        <option value="8">8 (Formidable)</option>
+        <option value="9">9 (Cruel)</option>
+      </select>
+    </label>
+  </p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-ep-tier" onclick="advanceEPTier()" disabled>Next</button>
+</div>
+
+<!-- ===== End extreme platformer sub-flow ===== -->
+
+<div id="page-extremes" hidden>
+  <p><label>How many extreme demons have you completed? <input type="number" id="extremes" min="0" step="1"></label></p>
+  <p id="error-extremes" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-extremes" onclick="advanceExtremes()" disabled>Next</button>
+</div>
+
+<div id="page-crp" hidden>
+  <p><label>How many creator points do you have? <input type="number" id="crp" min="0" step="1"></label></p>
+  <p id="error-crp" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-crp" onclick="advanceCrPCount()" disabled>Next</button>
+</div>
+
+<div id="page-crp-rank" hidden>
+  <p><label>What is your global creator points rank? <input type="number" id="crp-rank" min="1" step="1"></label></p>
+  <p>
+    <button id="verify-crp" onclick="verifyRank('crp')" disabled>Verify</button>
+    <span id="crp-verify-status"></span>
+  </p>
+  <p id="error-crp-rank" style="color:red"></p>
+  <button onclick="goBack()">Back</button>
+  <button id="next-crp-rank" onclick="advanceCrPRank()" disabled>Next</button>
+</div>
+
+<div id="page-results" hidden>
+  <p>Collected state (geomean computation requires backend; not yet wired):</p>
+  <pre id="debug-state"></pre>
+  <button onclick="goBack()">Back</button>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — backend should keep these current
+// ============================================================
+// Pemonlist position of the current bottom rated TPL level. Used to cap a
+// projected Pemonlist rank claimed via the unrated TPL-worthy=yes path.
+const TPL_BOTTOM_RATED_PEMONLIST_POSITION = 41;
+// Whether the current TPL #100 (bottom of TPL) is itself rated. When true, the
+// bottom rated TPL level IS #100, so the cap is exact (no leniency). When
+// false, the bottom rated level sits above #100 and we allow one rank of slack.
+const TPL_HUNDREDTH_IS_RATED = false;
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  onLeaderboards: null,
+  stars: null, starRank: null,
+  moons: null, moonRank: null,
+  userCoins: null, userCoinRank: null,
+  demons: null, demonRank: null,
+  hardestClassicDemon: null,
+  hardestPlatformerDemon: null,
+  extremeDemons: null,
+  creatorPoints: null, creatorPointRank: null,
+};
+
+const pageVerified = { stars: false, moons: false, coins: false, demons: false, crp: false };
+let hcVerified = false;
+let hpVerified = false;
+
+// Source: GD Wiki (Fan Ideas Wiki, List of Levels). Lowercased "name|creator".
+const KNOWN_LEVELS = {
+  'clubstep|robtop': 14,
+  'theory of everything 2|robtop': 18,
+  'deadlocked|robtop': 20,
+};
+
+// ============================================================
+// NAVIGATION (history-stack-based)
+// ============================================================
+const navHistory = ['page-eligibility'];
+
+function showPage(id) {
+  document.querySelectorAll('div[id^=page-]').forEach(p => p.hidden = true);
+  document.getElementById(id).hidden = false;
+  window.scrollTo(0, 0);
+}
+
+function goNext(id) {
+  navHistory.push(id);
+  showPage(id);
+}
+
+function goBack() {
+  if (navHistory.length <= 1) return;
+  navHistory.pop();
+  showPage(navHistory[navHistory.length - 1]);
+}
+
+// ============================================================
+// PAGE 1: ELIGIBILITY
+// ============================================================
+const elRadios = document.querySelectorAll('input[name="eligibility"]');
+const elNext = document.getElementById('next-eligibility');
+elRadios.forEach(r => r.addEventListener('change', () => {
+  elNext.disabled = ![...elRadios].some(x => x.checked);
+}));
+
+function advanceEligibility() {
+  const choice = [...elRadios].find(x => x.checked);
+  if (!choice) return;
+  state.onLeaderboards = (choice.value === 'yes');
+  goNext('page-stars');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function stripNonDigits(el) {
+  const cleaned = el.value.replace(/[^0-9]/g, '');
+  if (cleaned !== el.value) el.value = cleaned;
+}
+
+function readInt(raw) {
+  return /^\d+$/.test(raw) ? parseInt(raw, 10) : null;
+}
+
+function readCountAndRank(opts) {
+  const err = document.getElementById(opts.errId);
+  const count = readInt(document.getElementById(opts.countId).value.trim());
+  if (count === null) { err.textContent = opts.label + ' count must be a non-negative integer.'; return null; }
+  let rank = null;
+  if (state.onLeaderboards) {
+    rank = readInt(document.getElementById(opts.rankId).value.trim());
+    if (rank === null || rank < 1) { err.textContent = opts.label + ' rank must be a positive integer.'; return null; }
+  }
+  err.textContent = '';
+  return { count, rank };
+}
+
+function setExtremeLevelName(name) {
+  document.querySelectorAll('.level-name-extreme').forEach(el => {
+    el.textContent = name;
+  });
+}
+
+// ============================================================
+// RANK VERIFICATION (stubbed)
+// ============================================================
+function verifyRank(page) {
+  pageVerified[page] = true;
+  const status = document.getElementById(page + '-verify-status');
+  status.textContent = ' Verified ✓ (stub)';
+  status.style.color = 'green';
+  recheckMap[page]();
+}
+
+function resetRankVerification(page) {
+  pageVerified[page] = false;
+  const status = document.getElementById(page + '-verify-status');
+  if (status) status.textContent = '';
+}
+
+// ============================================================
+// EXTREMES-PAGE GATE
+// ============================================================
+function shouldAskExtremes() {
+  const hc = state.hardestClassicDemon;
+  const hp = state.hardestPlatformerDemon;
+  return (hc && hc.difficulty === 'Extreme Demon') || (hp && hp.difficulty === 'Extreme Demon');
+}
+
+// ============================================================
+// STARS / MOONS / COINS - split count + rank pages
+// ============================================================
+function advanceStarsCount() {
+  const err = document.getElementById('error-stars');
+  const count = readInt(document.getElementById('stars').value.trim());
+  if (count === null) { err.textContent = 'Star count must be a non-negative integer.'; return; }
+  err.textContent = '';
+  if (count !== state.stars) resetRankVerification('stars');
+  state.stars = count;
+  if (count === 0 || !state.onLeaderboards) {
+    state.starRank = null;
+    goNext('page-moons');
+  } else {
+    goNext('page-stars-rank');
+  }
+}
+
+function advanceStarsRank() {
+  const err = document.getElementById('error-stars-rank');
+  const rank = readInt(document.getElementById('star-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Star rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.starRank = rank;
+  goNext('page-moons');
+}
+
+function advanceMoonsCount() {
+  const err = document.getElementById('error-moons');
+  const count = readInt(document.getElementById('moons').value.trim());
+  if (count === null) { err.textContent = 'Moon count must be a non-negative integer.'; return; }
+  err.textContent = '';
+  if (count !== state.moons) resetRankVerification('moons');
+  state.moons = count;
+  if (count === 0 || !state.onLeaderboards) {
+    state.moonRank = null;
+    goNext('page-coins');
+  } else {
+    goNext('page-moons-rank');
+  }
+}
+
+function advanceMoonsRank() {
+  const err = document.getElementById('error-moons-rank');
+  const rank = readInt(document.getElementById('moon-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Moon rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.moonRank = rank;
+  goNext('page-coins');
+}
+
+function advanceCoinsCount() {
+  const err = document.getElementById('error-coins');
+  const count = readInt(document.getElementById('user-coins').value.trim());
+  if (count === null) { err.textContent = 'User coin count must be a non-negative integer.'; return; }
+  err.textContent = '';
+  if (count !== state.userCoins) resetRankVerification('coins');
+  state.userCoins = count;
+  if (count === 0 || !state.onLeaderboards) {
+    state.userCoinRank = null;
+    proceedAfterCoins();
+  } else {
+    goNext('page-coins-rank');
+  }
+}
+
+function advanceCoinsRank() {
+  const err = document.getElementById('error-coins-rank');
+  const rank = readInt(document.getElementById('user-coin-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'User coin rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.userCoinRank = rank;
+  proceedAfterCoins();
+}
+
+function proceedAfterCoins() {
+  if (state.stars < 10 && state.moons < 10) {
+    state.demons = 0;
+    state.demonRank = null;
+    state.hardestClassicDemon = null;
+    state.hardestPlatformerDemon = null;
+    state.extremeDemons = 0;
+    goNext('page-crp');
+  } else {
+    goNext('page-demons');
+  }
+}
+
+// ============================================================
+// DEMONS - split count + rank pages
+// ============================================================
+function advanceDemonsCount() {
+  const err = document.getElementById('error-demons');
+  const count = readInt(document.getElementById('demons').value.trim());
+  if (count === null) { err.textContent = 'Demon count must be a non-negative integer.'; return; }
+  err.textContent = '';
+  if (count !== state.demons) resetRankVerification('demons');
+  state.demons = count;
+  if (count === 0) {
+    state.demonRank = null;
+    state.hardestClassicDemon = null;
+    state.hardestPlatformerDemon = null;
+    state.extremeDemons = 0;
+    goNext('page-crp');
+    return;
+  }
+  if (!state.onLeaderboards) {
+    state.demonRank = null;
+    proceedAfterDemons();
+  } else {
+    goNext('page-demons-rank');
+  }
+}
+
+function advanceDemonsRank() {
+  const err = document.getElementById('error-demons-rank');
+  const rank = readInt(document.getElementById('demon-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Demon rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.demonRank = rank;
+  proceedAfterDemons();
+}
+
+function proceedAfterDemons() {
+  if (state.stars < 10) {
+    state.hardestClassicDemon = null;
+    goNext('page-hardest-platformer');
+  } else {
+    goNext('page-hardest-classic');
+  }
+}
+
+// ============================================================
+// HARDEST CLASSIC + extreme classic sub-flow
+// ============================================================
+function advanceHardestClassic() {
+  if (document.getElementById('hc-none').checked) {
+    state.hardestClassicDemon = null;
+    goAfterClassic();
+    return;
+  }
+  state.hardestClassicDemon = {
+    name: document.getElementById('hc-name').value,
+    creator: document.getElementById('hc-creator').value,
+    id: parseInt(document.getElementById('hc-id').value.trim(), 10),
+    difficulty: document.getElementById('hc-difficulty').value,
+    isRated: !document.getElementById('hc-unrated').checked,
+    extremeData: null,
+    gddlOnGDDL: null,
+    gddlTier: null,
+  };
+  setExtremeLevelName(state.hardestClassicDemon.name);
+  if (state.hardestClassicDemon.difficulty === 'Extreme Demon') {
+    if (state.hardestClassicDemon.isRated) {
+      goNext('page-ec-pcrate-question');
+    } else {
+      goNext('page-ec-gdl-question');
+    }
+  } else {
+    dispatchGDDLCheck();
+  }
+}
+
+function dispatchGDDLCheck() {
+  const hcd = state.hardestClassicDemon;
+  if (!hcd) { goAfterClassic(); return; }
+  const source = hcd.extremeData && hcd.extremeData.source;
+  // Pointercrate-related paths (actual Pcrate rank or projected Pcrate placement)
+  // already give a more precise ranking than a GDDL tier would, so skip GDDL.
+  if (source === 'pointercrate' || source === 'projected-pcrate') {
+    hcd.gddlOnGDDL = null;
+    hcd.gddlTier = null;
+    goAfterClassic();
+    return;
+  }
+  // ratedButNotPlaced=true is only set in advanceECAredlRank, which is reachable
+  // only when isRated is already true — so checking isRated alone covers both
+  // "truly rated" and "rated-but-not-yet-placed on Pcrate/AREDL."
+  if (hcd.isRated) {
+    goToGDDLQuestion();
+    return;
+  }
+  // Unrated. GDDL is rated-only, so the level can't actually be on GDDL.
+  // Only ask "what tier would it be" when the unrated extreme is neither
+  // Pointercrate-worthy nor on the Global Demonlist (i.e. source='not-worthy').
+  if (source === 'not-worthy') {
+    goToGDDLTierDirect();
+    return;
+  }
+  hcd.gddlOnGDDL = false;
+  hcd.gddlTier = null;
+  goAfterClassic();
+}
+
+function goToGDDLQuestion() {
+  setExtremeLevelName(state.hardestClassicDemon.name);
+  goNext('page-gddl-question');
+}
+
+function goToGDDLTierDirect() {
+  // Unrated + not-worthy + not-on-GDL extreme: skip the y/n step entirely, since
+  // GDDL doesn't list the level. We're asking what tier it WOULD be.
+  setExtremeLevelName(state.hardestClassicDemon.name);
+  state.hardestClassicDemon.gddlOnGDDL = false;
+  setGDDLTierPrompt('would');
+  prepareGDDLTierDropdown();
+  goNext('page-gddl-tier');
+}
+
+function setGDDLTierPrompt(mode) {
+  const prompt = document.getElementById('gddl-tier-prompt');
+  prompt.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = state.hardestClassicDemon.name;
+  const link = document.createElement('a');
+  // 'would' (hypothetical tier) → /references/ for tier definitions.
+  // 'is' (existing tier on GDDL) → /search/ for actual tier lookup.
+  link.href = mode === 'would'
+    ? 'https://gdladder.com/references'
+    : 'https://gdladder.com/search';
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.textContent = 'Geometry Dash Demon Ladder';
+  if (mode === 'would') {
+    prompt.appendChild(document.createTextNode('What tier would '));
+    prompt.appendChild(strong);
+    prompt.appendChild(document.createTextNode(' be on the '));
+    prompt.appendChild(link);
+    prompt.appendChild(document.createTextNode('?'));
+  } else {
+    prompt.appendChild(document.createTextNode('What tier is '));
+    prompt.appendChild(strong);
+    prompt.appendChild(document.createTextNode(' on the '));
+    prompt.appendChild(link);
+    prompt.appendChild(document.createTextNode('?'));
+  }
+}
+
+function getGDDLTierRange() {
+  // GDDL tier ranges per gdladder.com/about: each non-extreme demon difficulty
+  // gets 5 tiers (Easy=1-5, Medium=6-10, Hard=11-15, Insane=16-20), and Extreme
+  // gets 19 tiers (21-39). Pointercrate-related extreme paths skip GDDL entirely
+  // in dispatchGDDLCheck (they have more precise info), so only non-Pointercrate
+  // extreme paths reach here — Pointercrate levels start at tier 34, so cap at 34.
+  const hcd = state.hardestClassicDemon;
+  const diff = hcd.difficulty;
+  if (diff === 'Easy Demon') return [1, 5];
+  if (diff === 'Medium Demon') return [6, 10];
+  if (diff === 'Hard Demon') return [11, 15];
+  if (diff === 'Insane Demon') return [16, 20];
+  return [21, 34];
+}
+
+function prepareGDDLTierDropdown() {
+  const tierEl = document.getElementById('gddl-tier');
+  const buttonEl = document.getElementById('next-gddl-tier');
+  const [minTier, maxTier] = getGDDLTierRange();
+  // Rebuild options for the applicable range, with a blank default at the top
+  tierEl.textContent = '';
+  const blank = document.createElement('option');
+  blank.value = '';
+  blank.textContent = '';
+  tierEl.appendChild(blank);
+  for (let t = minTier; t <= maxTier; t++) {
+    const opt = document.createElement('option');
+    opt.value = String(t);
+    opt.textContent = String(t);
+    tierEl.appendChild(opt);
+  }
+  // Restore saved tier if still in range; otherwise stay blank
+  const saved = state.hardestClassicDemon.gddlTier;
+  if (saved !== null && saved >= minTier && saved <= maxTier) {
+    tierEl.value = String(saved);
+  } else {
+    tierEl.value = '';
+  }
+  buttonEl.disabled = !tierEl.value;
+}
+
+function advanceGDDLQuestion() {
+  const choice = document.querySelector('input[name="gddl-q"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    state.hardestClassicDemon.gddlOnGDDL = true;
+    setGDDLTierPrompt('is');
+    prepareGDDLTierDropdown();
+    goNext('page-gddl-tier');
+  } else {
+    state.hardestClassicDemon.gddlOnGDDL = false;
+    // Rated-but-not-yet-placed extreme that isn't Pcrate-worthy and isn't on
+    // GDL: with "no" to GDDL, every list signal is exhausted. Fall through to
+    // hypothetical-tier collection (same flow as unrated not-worthy uses) so
+    // we still have *some* ranking signal for the percentile math.
+    const ed = state.hardestClassicDemon.extremeData;
+    if (ed && ed.source === 'not-worthy' && ed.ratedButNotPlaced) {
+      setGDDLTierPrompt('would');
+      prepareGDDLTierDropdown();
+      goNext('page-gddl-tier');
+      return;
+    }
+    state.hardestClassicDemon.gddlTier = null;
+    goAfterClassic();
+  }
+}
+
+function advanceGDDLTier() {
+  const tier = parseInt(document.getElementById('gddl-tier').value, 10);
+  state.hardestClassicDemon.gddlTier = tier;
+  goAfterClassic();
+}
+
+function goAfterClassic() {
+  if (state.moons < 10) {
+    state.hardestPlatformerDemon = null;
+    if (shouldAskExtremes()) {
+      goNext('page-extremes');
+    } else {
+      state.extremeDemons = 0;
+      goNext('page-crp');
+    }
+  } else {
+    goNext('page-hardest-platformer');
+  }
+}
+
+function advanceECPcrateQuestion() {
+  const choice = document.querySelector('input[name="ec-pcrate-q"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    goNext('page-ec-pcrate-rank');
+  } else {
+    goNext('page-ec-aredl-rank');
+  }
+}
+
+function advanceECPcrateRank() {
+  const err = document.getElementById('error-ec-pcrate-rank');
+  const rank = readInt(document.getElementById('ec-pcrate-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.hardestClassicDemon.extremeData = {
+    source: 'pointercrate',
+    rank: rank,
+    ratedButNotPlaced: false,
+  };
+  dispatchGDDLCheck();
+}
+
+function advanceECAredlRank() {
+  // If "rated but not yet placed" checkbox is checked, redirect to not-rated flow
+  if (document.getElementById('ec-aredl-pending').checked) {
+    // Level IS rated in-game; we just don't have a Pointercrate placement yet.
+    // Pass through to the not-rated question chain; isRated stays true.
+    state.hardestClassicDemon.extremeData = { ratedButNotPlaced: true };
+    goNext('page-ec-gdl-question');
+    return;
+  }
+  const err = document.getElementById('error-ec-aredl-rank');
+  const rank = readInt(document.getElementById('ec-aredl-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.hardestClassicDemon.extremeData = {
+    source: 'aredl',
+    rank: rank,
+    ratedButNotPlaced: false,
+  };
+  dispatchGDDLCheck();
+}
+
+function advanceECGdlQuestion() {
+  const choice = document.querySelector('input[name="ec-gdl-q"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    goNext('page-ec-gdl-rank');
+  } else {
+    goNext('page-ec-pcrate-worthy');
+  }
+}
+
+function advanceECGdlRank() {
+  const err = document.getElementById('error-ec-gdl-rank');
+  const rank = readInt(document.getElementById('ec-gdl-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.hardestClassicDemon.extremeData = {
+    ...state.hardestClassicDemon.extremeData,
+    source: 'gdl',
+    rank: rank,
+  };
+  dispatchGDDLCheck();
+}
+
+function advanceECPcrateWorthy() {
+  const choice = document.querySelector('input[name="ec-pcrate-worthy"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    goNext('page-ec-pcrate-projected');
+  } else {
+    state.hardestClassicDemon.extremeData = {
+      ...state.hardestClassicDemon.extremeData,
+      source: 'not-worthy',
+    };
+    dispatchGDDLCheck();
+  }
+}
+
+function advanceECPcrateProjected() {
+  const err = document.getElementById('error-ec-pcrate-projected');
+  const rank = readInt(document.getElementById('ec-pcrate-projected-rank').value.trim());
+  const below = document.getElementById('ec-pcrate-projected-below').value.trim();
+  if (rank === null || rank < 1 || !below) { err.textContent = 'Both fields required; rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.hardestClassicDemon.extremeData = {
+    ...state.hardestClassicDemon.extremeData,
+    source: 'projected-pcrate',
+    projectedRank: rank,
+    levelBelow: below,
+  };
+  dispatchGDDLCheck();
+}
+
+// ============================================================
+// HARDEST PLATFORMER
+// ============================================================
+function advanceHardestPlatformer() {
+  if (document.getElementById('hp-none').checked) {
+    state.hardestPlatformerDemon = null;
+    goAfterPlatformer();
+    return;
+  }
+  state.hardestPlatformerDemon = {
+    name: document.getElementById('hp-name').value,
+    creator: document.getElementById('hp-creator').value,
+    id: parseInt(document.getElementById('hp-id').value.trim(), 10),
+    difficulty: document.getElementById('hp-difficulty').value,
+    isRated: !document.getElementById('hp-unrated').checked,
+    extremeData: null,
+  };
+  if (state.hardestPlatformerDemon.difficulty === 'Extreme Demon') {
+    setPlatformerExtremeLevelName(state.hardestPlatformerDemon.name);
+    if (state.hardestPlatformerDemon.isRated) {
+      goNext('page-ep-pemonlist-question');
+    } else {
+      // Unrated extremes skip Pemonlist (rated-only) and start at TPL.
+      goNext('page-ep-tpl-question');
+    }
+  } else {
+    // Non-extreme platformers: face rating alone is the signal. The PDC tier
+    // mapping doesn't cleanly partition by face rating below extreme, so no
+    // sub-flow.
+    goAfterPlatformer();
+  }
+}
+
+function goAfterPlatformer() {
+  if (shouldAskExtremes()) {
+    goNext('page-extremes');
+  } else {
+    state.extremeDemons = 0;
+    goNext('page-crp');
+  }
+}
+
+function setPlatformerExtremeLevelName(name) {
+  document.querySelectorAll('.level-name-platformer-extreme').forEach(el => {
+    el.textContent = name;
+  });
+}
+
+// ============================================================
+// EXTREME PLATFORMER SUB-FLOW
+// ============================================================
+function advanceEPPemonlistQuestion() {
+  const choice = document.querySelector('input[name="ep-pemonlist-q"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    goNext('page-ep-pemonlist-rank');
+  } else {
+    goNext('page-ep-pemonlist-worthy');
+  }
+}
+
+function advanceEPPemonlistRank() {
+  const err = document.getElementById('error-ep-pemonlist-rank');
+  const rank = readInt(document.getElementById('ep-pemonlist-rank').value.trim());
+  if (rank === null || rank < 1 || rank > 150) {
+    err.textContent = 'Pemonlist rank must be between 1 and 150.';
+    return;
+  }
+  err.textContent = '';
+  state.hardestPlatformerDemon.extremeData = {
+    source: 'pemonlist',
+    rank: rank,
+  };
+  goAfterPlatformer();
+}
+
+function advanceEPPemonlistWorthy() {
+  const choice = document.querySelector('input[name="ep-pemonlist-worthy"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    // Rated, not on Pemonlist, but Pemonlist-worthy — covers both placement
+    // lag and recent fall-to-legacy cases. Per Catherine: a rated level that
+    // belongs on Pemonlist is guaranteed TPL material, so just ask "is" not
+    // "would" for TPL.
+    goNext('page-ep-tpl-question');
+  } else {
+    // Rated and not Pemonlist-worthy — sub-Pemonlist rated levels cluster in
+    // the single tier below the cutoff. Silent route to whatever comes next.
+    state.hardestPlatformerDemon.extremeData = {
+      source: 'not-on-pemonlist-stable',
+      pdcTier: 6,
+    };
+    goAfterPlatformer();
+  }
+}
+
+function advanceEPTPLQuestion() {
+  const choice = document.querySelector('input[name="ep-tpl-q"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    goNext('page-ep-tpl-rank');
+  } else {
+    // Rated path implies TPL-worthy (we got here via Pemonlist-worthy=yes),
+    // so skip the worthy question and go straight to projected Pemonlist
+    // rank. Unrated path still needs the worthy question.
+    if (state.hardestPlatformerDemon.isRated) {
+      goNext('page-ep-pemonlist-projected');
+    } else {
+      goNext('page-ep-tpl-worthy');
+    }
+  }
+}
+
+function advanceEPTPLRank() {
+  const err = document.getElementById('error-ep-tpl-rank');
+  const rank = readInt(document.getElementById('ep-tpl-rank').value.trim());
+  if (rank === null || rank < 1 || rank > 100) {
+    err.textContent = 'TPL rank must be between 1 and 100.';
+    return;
+  }
+  err.textContent = '';
+  state.hardestPlatformerDemon.extremeData = {
+    source: 'tpl',
+    rank: rank,
+  };
+  goAfterPlatformer();
+}
+
+function advanceEPTPLWorthy() {
+  const choice = document.querySelector('input[name="ep-tpl-worthy"]:checked');
+  if (!choice) return;
+  if (choice.value === 'yes') {
+    goNext('page-ep-pemonlist-projected');
+  } else {
+    goNext('page-ep-tier');
+  }
+}
+
+function advanceEPPemonlistProjected() {
+  const err = document.getElementById('error-ep-pemonlist-projected');
+  const rank = readInt(document.getElementById('ep-pemonlist-projected-rank').value.trim());
+  // No .trim() on level-below — preserves the single-space-name invariant.
+  const below = document.getElementById('ep-pemonlist-projected-below').value;
+  const hp = state.hardestPlatformerDemon;
+  // Cap: if user reached this page via the unrated TPL-worthy=yes path, the
+  // projected Pemonlist rank can't exceed the Pemonlist position of the
+  // current bottom rated TPL level — exactly if TPL #100 is itself rated,
+  // otherwise with one rank of slack. Rated path uses the full 1-150 range
+  // since Pemonlist-worthy was already affirmed.
+  const tplWorthyCap = TPL_HUNDREDTH_IS_RATED
+    ? TPL_BOTTOM_RATED_PEMONLIST_POSITION
+    : TPL_BOTTOM_RATED_PEMONLIST_POSITION + 1;
+  const cap = hp.isRated ? 150 : tplWorthyCap;
+  if (rank === null || rank < 1 || rank > cap || !below) {
+    err.textContent = `Both fields required; projected Pemonlist rank must be between 1 and ${cap}.`;
+    return;
+  }
+  err.textContent = '';
+  hp.extremeData = {
+    source: 'projected-pemonlist',
+    projectedRank: rank,
+    levelBelow: below,
+  };
+  goAfterPlatformer();
+}
+
+function advanceEPTier() {
+  const tier = parseInt(document.getElementById('ep-tier').value, 10);
+  state.hardestPlatformerDemon.extremeData = {
+    source: 'not-worthy',
+    pdcTier: tier,
+  };
+  goAfterPlatformer();
+}
+
+function advanceExtremes() {
+  const err = document.getElementById('error-extremes');
+  const count = readInt(document.getElementById('extremes').value.trim());
+  if (count === null) { err.textContent = 'Extreme demon count must be a non-negative integer.'; return; }
+  err.textContent = '';
+  state.extremeDemons = count;
+  goNext('page-crp');
+}
+
+function advanceCrPCount() {
+  const err = document.getElementById('error-crp');
+  const count = readInt(document.getElementById('crp').value.trim());
+  if (count === null) { err.textContent = 'Creator point count must be a non-negative integer.'; return; }
+  err.textContent = '';
+  if (count !== state.creatorPoints) resetRankVerification('crp');
+  state.creatorPoints = count;
+  if (count === 0) {
+    state.creatorPointRank = null;
+    document.getElementById('debug-state').textContent = JSON.stringify(state, null, 2);
+    goNext('page-results');
+  } else {
+    goNext('page-crp-rank');
+  }
+}
+
+function advanceCrPRank() {
+  const err = document.getElementById('error-crp-rank');
+  const rank = readInt(document.getElementById('crp-rank').value.trim());
+  if (rank === null || rank < 1) { err.textContent = 'Creator points rank must be a positive integer.'; return; }
+  err.textContent = '';
+  state.creatorPointRank = rank;
+  document.getElementById('debug-state').textContent = JSON.stringify(state, null, 2);
+  goNext('page-results');
+}
+
+// ============================================================
+// HARDEST-DEMON VERIFICATION (stubbed)
+// ============================================================
+function verifyHardest(prefix) {
+  const name = document.getElementById(prefix + '-name').value;
+  const creator = document.getElementById(prefix + '-creator').value;
+  const id = document.getElementById(prefix + '-id').value.trim();
+  const difficulty = document.getElementById(prefix + '-difficulty').value;
+  const unrated = document.getElementById(prefix + '-unrated').checked;
+  const status = document.getElementById(prefix + '-verify-status');
+
+  if (!name || !creator || !id || !difficulty) {
+    status.textContent = ' Fill all fields before verifying.';
+    status.style.color = 'red';
+    return;
+  }
+
+  if (prefix === 'hc') hcVerified = true;
+  else hpVerified = true;
+  status.textContent = ' Verified ✓ (stub' + (unrated ? '; not-rated path' : '') + ')';
+  status.style.color = 'green';
+  if (prefix === 'hc') recheckHC();
+  else recheckHP();
+}
+
+function resetHardestVerification(prefix) {
+  if (prefix === 'hc') hcVerified = false;
+  else hpVerified = false;
+  document.getElementById(prefix + '-verify-status').textContent = '';
+}
+
+// ============================================================
+// LEVEL ID AUTO-FILL
+// ============================================================
+function checkAutofillId(prefix) {
+  const nameEl = document.getElementById(prefix + '-name');
+  const creatorEl = document.getElementById(prefix + '-creator');
+  const idEl = document.getElementById(prefix + '-id');
+  const key = nameEl.value.trim().toLowerCase() + '|' + creatorEl.value.trim().toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(KNOWN_LEVELS, key)) {
+    idEl.value = KNOWN_LEVELS[key];
+    idEl.readOnly = true;
+  } else if (idEl.readOnly) {
+    idEl.readOnly = false;
+    idEl.value = '';
+  }
+}
+
+// ============================================================
+// WIRING
+// ============================================================
+function wireCountPage(countId, buttonId) {
+  const countEl = document.getElementById(countId);
+  const buttonEl = document.getElementById(buttonId);
+  const recheck = () => {
+    buttonEl.disabled = !countEl.value.trim();
+  };
+  countEl.addEventListener('input', () => {
+    stripNonDigits(countEl);
+    recheck();
+  });
+  recheck();
+  return recheck;
+}
+
+function wireRankPage(rankId, buttonId, page) {
+  const rankEl = document.getElementById(rankId);
+  const buttonEl = document.getElementById(buttonId);
+  const verifyEl = document.getElementById('verify-' + page);
+  const recheck = () => {
+    verifyEl.disabled = !rankEl.value.trim();
+    buttonEl.disabled = !(rankEl.value.trim() !== '' && pageVerified[page]);
+  };
+  rankEl.addEventListener('input', () => {
+    stripNonDigits(rankEl);
+    resetRankVerification(page);
+    recheck();
+  });
+  recheck();
+  return recheck;
+}
+
+function recheckHardestVerifyButton(prefix) {
+  // Verify is enabled only when every required field has a value. Note: a
+  // single-space level name (the actual GD level " ") counts as filled since
+  // we don't trim name/creator — only zero-length strings are rejected here.
+  const name = document.getElementById(prefix + '-name').value;
+  const creator = document.getElementById(prefix + '-creator').value;
+  const id = document.getElementById(prefix + '-id').value.trim();
+  const difficulty = document.getElementById(prefix + '-difficulty').value;
+  document.getElementById('verify-' + prefix).disabled =
+    !(name && creator && id && difficulty);
+}
+
+function recheckHC() {
+  if (document.getElementById('hc-none').checked) {
+    document.getElementById('next-hc').disabled = false;
+    return;
+  }
+  recheckHardestVerifyButton('hc');
+  document.getElementById('next-hc').disabled = !hcVerified;
+}
+
+function recheckHP() {
+  if (document.getElementById('hp-none').checked) {
+    document.getElementById('next-hp').disabled = false;
+    return;
+  }
+  recheckHardestVerifyButton('hp');
+  document.getElementById('next-hp').disabled = !hpVerified;
+}
+
+function wireHardest(prefix, recheck) {
+  const formInputs = [
+    prefix + '-name', prefix + '-creator', prefix + '-id',
+    prefix + '-difficulty', prefix + '-unrated', 'verify-' + prefix,
+  ].map(id => document.getElementById(id));
+  document.getElementById(prefix + '-none').addEventListener('change', () => {
+    const none = document.getElementById(prefix + '-none').checked;
+    formInputs.forEach(el => el.disabled = none);
+    resetHardestVerification(prefix);
+    recheck();
+  });
+  const nameEl = document.getElementById(prefix + '-name');
+  const creatorEl = document.getElementById(prefix + '-creator');
+  [nameEl, creatorEl].forEach(el => {
+    el.addEventListener('input', () => {
+      checkAutofillId(prefix);
+      resetHardestVerification(prefix);
+      recheck();
+    });
+  });
+  const idEl = document.getElementById(prefix + '-id');
+  idEl.addEventListener('input', () => {
+    stripNonDigits(idEl);
+    resetHardestVerification(prefix);
+    recheck();
+  });
+  ['difficulty', 'unrated'].forEach(field => {
+    document.getElementById(prefix + '-' + field).addEventListener('change', () => {
+      resetHardestVerification(prefix);
+      recheck();
+    });
+  });
+  recheck();
+}
+
+// ----- Extreme classic sub-flow wiring -----
+
+function wireRadioPage(radioName, buttonId) {
+  const radios = document.querySelectorAll(`input[name="${radioName}"]`);
+  const buttonEl = document.getElementById(buttonId);
+  const recheck = () => {
+    buttonEl.disabled = ![...radios].some(r => r.checked);
+  };
+  radios.forEach(r => r.addEventListener('change', recheck));
+  recheck();
+}
+
+function wireSimpleRankPage(rankId, buttonId) {
+  const rankEl = document.getElementById(rankId);
+  const buttonEl = document.getElementById(buttonId);
+  const recheck = () => {
+    buttonEl.disabled = !rankEl.value.trim();
+  };
+  rankEl.addEventListener('input', () => {
+    stripNonDigits(rankEl);
+    recheck();
+  });
+  recheck();
+}
+
+function wireAredlRankPage() {
+  const rankEl = document.getElementById('ec-aredl-rank');
+  const pendingCb = document.getElementById('ec-aredl-pending');
+  const buttonEl = document.getElementById('next-ec-aredl-rank');
+  const recheck = () => {
+    if (pendingCb.checked) {
+      rankEl.disabled = true;
+      buttonEl.disabled = false;
+      return;
+    }
+    rankEl.disabled = false;
+    buttonEl.disabled = !rankEl.value.trim();
+  };
+  rankEl.addEventListener('input', () => {
+    stripNonDigits(rankEl);
+    recheck();
+  });
+  pendingCb.addEventListener('change', recheck);
+  recheck();
+}
+
+function wireProjectedPage() {
+  const rankEl = document.getElementById('ec-pcrate-projected-rank');
+  const belowEl = document.getElementById('ec-pcrate-projected-below');
+  const buttonEl = document.getElementById('next-ec-pcrate-projected');
+  const recheck = () => {
+    buttonEl.disabled = !(rankEl.value.trim() && belowEl.value.trim());
+  };
+  rankEl.addEventListener('input', () => {
+    stripNonDigits(rankEl);
+    recheck();
+  });
+  belowEl.addEventListener('input', recheck);
+  recheck();
+}
+
+function wireEPProjectedPage() {
+  const rankEl = document.getElementById('ep-pemonlist-projected-rank');
+  const belowEl = document.getElementById('ep-pemonlist-projected-below');
+  const buttonEl = document.getElementById('next-ep-pemonlist-projected');
+  const recheck = () => {
+    // No .trim() on level-below — preserves the single-space-name invariant.
+    buttonEl.disabled = !(rankEl.value.trim() && belowEl.value);
+  };
+  rankEl.addEventListener('input', () => {
+    stripNonDigits(rankEl);
+    recheck();
+  });
+  belowEl.addEventListener('input', recheck);
+  recheck();
+}
+
+// Wire all pages
+wireCountPage('stars', 'next-stars');
+const recheckStarsRank = wireRankPage('star-rank', 'next-stars-rank', 'stars');
+wireCountPage('moons', 'next-moons');
+const recheckMoonsRank = wireRankPage('moon-rank', 'next-moons-rank', 'moons');
+wireCountPage('user-coins', 'next-coins');
+const recheckCoinsRank = wireRankPage('user-coin-rank', 'next-coins-rank', 'coins');
+wireCountPage('demons', 'next-demons');
+const recheckDemonsRank = wireRankPage('demon-rank', 'next-demons-rank', 'demons');
+wireCountPage('extremes', 'next-extremes');
+wireCountPage('crp', 'next-crp');
+const recheckCrPRank = wireRankPage('crp-rank', 'next-crp-rank', 'crp');
+wireHardest('hc', recheckHC);
+wireHardest('hp', recheckHP);
+
+// Extreme classic sub-flow
+wireRadioPage('ec-pcrate-q', 'next-ec-pcrate-q');
+wireSimpleRankPage('ec-pcrate-rank', 'next-ec-pcrate-rank');
+wireAredlRankPage();
+wireRadioPage('ec-gdl-q', 'next-ec-gdl-q');
+wireSimpleRankPage('ec-gdl-rank', 'next-ec-gdl-rank');
+wireRadioPage('ec-pcrate-worthy', 'next-ec-pcrate-worthy');
+wireProjectedPage();
+
+// GDDL check (applies to all hardest classics)
+wireRadioPage('gddl-q', 'next-gddl-q');
+document.getElementById('gddl-tier').addEventListener('change', () => {
+  document.getElementById('next-gddl-tier').disabled =
+    !document.getElementById('gddl-tier').value;
+});
+
+// Extreme platformer sub-flow
+wireRadioPage('ep-pemonlist-q', 'next-ep-pemonlist-q');
+wireSimpleRankPage('ep-pemonlist-rank', 'next-ep-pemonlist-rank');
+wireRadioPage('ep-pemonlist-worthy', 'next-ep-pemonlist-worthy');
+wireRadioPage('ep-tpl-q', 'next-ep-tpl-q');
+wireSimpleRankPage('ep-tpl-rank', 'next-ep-tpl-rank');
+wireRadioPage('ep-tpl-worthy', 'next-ep-tpl-worthy');
+wireEPProjectedPage();
+document.getElementById('ep-tier').addEventListener('change', () => {
+  document.getElementById('next-ep-tier').disabled =
+    !document.getElementById('ep-tier').value;
+});
+
+const recheckMap = {
+  stars: recheckStarsRank,
+  moons: recheckMoonsRank,
+  coins: recheckCoinsRank,
+  demons: recheckDemonsRank,
+  crp: recheckCrPRank,
+};
+</script>
+
+</body>
+</html>
