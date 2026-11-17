@@ -14,9 +14,11 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install pandas
+      - run: pip install matplotlib
       - run: python siphon_api.py
+        working-directory: datascience
+      - run: python create_chart.py
         working-directory: datascience
       - uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Automated change
-          commit_author: Orkut2
