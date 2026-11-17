@@ -75,6 +75,7 @@ best_estimate = logpower(a,b)
 
 mpl.plot( range(11,151) , total_victors[10:] )
 mpl.plot( range(11,151) , best_estimate )
+mpl.savefig("local_fit.png")
 
 # algorithm to find the best fit log-power law
 # because players typically jump in layers of 2/3 - 1/3 of their current hardest's rank
@@ -87,4 +88,6 @@ mpl.plot( range(11,151) , total_victors[10:] )
 mpl.plot( range(11,2001) , extrapolation )
 final_estimate = int(round(a * log(number_of_extreme_demons)**b))
 mpl.plot( [number_of_extreme_demons, number_of_extreme_demons] , [0, max(extrapolation)] )
+mpl.text(number_of_extreme_demons, final_estimate, f" {final_estimate}")
 print(f"Final estimate for the number of people who have beat an extreme demon: {final_estimate}")
+mpl.savefig("victors_extrapolation.png")
